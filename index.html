@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <meta charset="UTF-8">
+  <title>Congress</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+  <script type="text/javascript" src="dirPagination.js"></script>
+  <script src="controllers.js"></script>
+  <script src="https://use.fontawesome.com/ad2d636948.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js"></script>
+  <link href="simple-sidebar.css" rel="stylesheet">
+
+  <style>
+      .form-inline{
+        text-align: right;
+      }
+      .carousel-control.left, .carousel-control.right {
+          background-image: none
+      }
+      .centered-text {
+        text-align:center
+      }
+      .table tr:first-child th{
+          border-top: none;
+      }
+      .icon-d {
+        color: yellow;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: orange;
+      }
+      .img-width{
+        max-width: 15%;
+      }
+      .highlight {
+        background: yellow;
+      }
+
+      @media screen and (max-width: 767px) {
+        .alt-table-responsive {
+          width: 100%;
+          margin-bottom: 15px;
+          overflow-y: hidden;
+          overflow-x: auto;
+          -ms-overflow-style: -ms-autohiding-scrollbar;
+          border: 1px solid #dddddd;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+      .table-responsive
+      {
+          overflow-x: auto;
+      }
+/*.list-group li:nth-child(1){
+  border-top: 0 none;
+}*/
+  </style>
+
+</head>
+<body>
+<!-- <button type="button" class="navbar-toggle collapsed" id="menu-toggle" data-toggle="collapse" data-target="#menu-toggle" aria-expanded="false"><span class="sr-only">Toggle Navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> -->
+<a href="#menu-toggle" class="btn btn-default nohover pull-left" style="border:0px solid transparent;" id="menu-toggle"><span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span></a>
+<!-- <div class="row"> -->     
+<div class="container">
+<div class="row">
+  <div class="span4"></div>
+  <div class="span4"><img class="img-responsive center-block" ng-style="mobileCheck() ? { 'width':'50%'} : { 'width': '10%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/logo.png"></div>
+  <div class="span4"></div>
+</div>
+</div>
+<!-- <img class="img-responsive" style="max-width: 15%;" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/logo.png">
+ --><!-- </div>
+ -->
+<!-- <a class="btn btn-primary btn-sm" href="#myCarousel" role="button" data-slide="next" ng-click="open(artists.indexOf(item)); calldetail(item.bioguide_id)" ng-=0">View Details</a> -->
+<div class="jumbotron" style="padding-top: 0px;" ng-controller = "MyController">
+  <div id="wrapper">
+    <div id="sidebar-wrapper">
+      <ul class="sidebar-nav nav nav-tabs" role="tablist">
+          <div class="col-xs-12">
+          <li><a role="tab" data-toggle="tab" href="#legislator"><i class="fa fa-user fa-2x" aria-hidden="true"></i><span ng-if="mobileCheck()" style="margin-left:10px">Legislators</span></a></li>
+          </div>
+          <div class="col-xs-12">
+          <li><a role="tab" data-toggle="tab" href="#bill" ng-click="getBills();"><i class="fa fa-file-o fa-2x" aria-hidden="true"></i><span ng-if="mobileCheck()" style="margin-left:10px">Bills</span></a></li>
+          </div>
+          <div class="col-xs-12">
+          <li><a role="tab" data-toggle="tab" href="#committee" ng-click="getCommittees(); chambertype = 'house';"><i class="fa fa-sign-in fa-2x" aria-hidden="true"></i><span ng-if="mobileCheck()" style="margin-left:10px">Committees</span></a></li>
+          </div>
+          <div class="col-xs-12">
+          <li><a role="tab" data-toggle="tab" href="#fav"><i class="fa fa-star fa-2x" aria-hidden="true"></i><span ng-if="mobileCheck()" style="margin-left:10px">Favorites</span></a></li>    
+          </div>
+      </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+    <div id="page-content-wrapper">
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="legislator">
+
+
+          <div class="container" style="padding-right: 0px; padding-left: 0px;">
+            <div class="row">
+              <div class="h3">Legislators</div><hr style="width: 100%; color: #3C3C3C; height: 0.5px; background-color:black;">
+              <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
+                <div class="carousel-inner" role="listbox">
+                  <div class="item active">
+                    <div class="well well-sm">
+                      <div class="container">
+                        <div class="row">
+                          <nav class="navbar navbar-default">
+                            <div class="container">                      
+                              <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a style="color: inherit;" role="tab" data-toggle="tab" href="#state" ng-click="query = null; query2 = null">By State</a></li>
+                                <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#house" ng-click="query = null; query2 = 'House'">House</a></li>
+                                <li><a style="color: inherit;" role="tab" data-toggle="tab" href="#senate" ng-click="query = null; query2 = 'Senate'">Senate</a></li>
+                              </ul>
+                            </div>
+                            <section class="col-sm-12">
+                              <div class="panel panel-default"> 
+                                <div class="panel-heading">
+                                  <form class="form-horizontal">
+                                    <div class="tab-content">
+                                      <div role="tabpanel" class="tab-pane active" id="state">
+                                        <div class="panel-title">Legislators by State</div>
+                                        <div class="form-group">
+                                          <div class="col-sm-4 col-sm-offset-8">
+                                            <select class="form-control pull-right" ng-model="query" id="selectSite">
+                                              <option value="All States" selected disabled>All States</option><!-- fix this  -->
+                                              <option value="Alabama">Alabama</option>
+                                              <option value="Alaska">Alaska</option>
+                                              <option value="Arizona">Arizona</option>
+                                              <option value="Arkansas">Arkansas</option>
+                                              <option value="California">California</option>
+                                              <option value="Colorado">Colorado</option>
+                                              <option value="Connecticut">Connecticut</option>
+                                              <option value="Delaware">Delaware</option>
+                                              <option value="District of Columbia">District of Columbia</option>
+                                              <option value="Florida">Florida</option>
+                                              <option value="Georgia">Georgia</option>
+                                              <option value="Hawaii">Hawaii</option>
+                                              <option value="Idaho">Idaho</option>
+                                              <option value="Illinois">Illinois</option>
+                                              <option value="Indiana">Indiana</option>
+                                              <option value="Iowa">Iowa</option>
+                                              <option value="Indiana">Indiana</option>
+                                              <option value="Kansas">Kansas</option>
+                                              <option value="Kentucky">Kentucky</option>
+                                              <option value="Louisiana">Louisiana</option>
+                                              <option value="Maine">Maine</option>
+                                              <option value="Maryland">Maryland</option>
+                                              <option value="Massachusetts">Massachusetts</option>
+                                              <option value="Michigan">Michigan</option>
+                                              <option value="Minnesota">Minnesota</option>
+                                              <option value="Mississippi">Mississippi</option>
+                                              <option value="Missouri">Missouri</option>
+                                              <option value="Montana">Montana</option>
+                                              <option value="Nebraska">Nebraska</option>
+                                              <option value="Nevada">Nevada</option>
+                                              <option value="New Hampshire">New Hampshire</option>
+                                              <option value="New Jersey">New Jersey</option>
+                                              <option value="New Mexico">New Mexico</option>
+                                              <option value="New York">New York</option>
+                                              <option value="North Carolina">North Carolina</option>
+                                              <option value="North Dakota">North Dakota</option>
+                                              <option value="Ohio">Ohio</option>
+                                              <option value="Oklahoma">Oklahoma</option>
+                                              <option value="Oregon">Oregon</option>
+                                              <option value="Pennsylvania">Pennsylvania</option>
+                                              <option value="Rhode Island">Rhode Island</option>
+                                              <option value="South Carolina">South Carolina</option>
+                                              <option value="South Dakota">South Dakota</option>
+                                              <option value="Tennessee">Tennessee</option>
+                                              <option value="Texas">Texas</option>
+                                              <option value="Utah">Utah</option>
+                                              <option value="Vermont">Vermont</option>
+                                              <option value="Virginia">Virginia</option>
+                                              <option value="Washington">Washington</option>
+                                              <option value="West Virginia">West Virginia</option>
+                                              <option value="Wisconsin">Wisconsin</option>
+                                              <option value="Wyoming">Wyoming</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div role="tabpanel" class="tab-pane" id="house">
+                                        <div class="panel-title">Legislators by House</div>
+                                        <div class="form-group">
+                                          <div class="col-sm-4 col-sm-offset-8">
+                                            <input ng-model="query" class="form-control" type="text" id="houseName" placeholder="Search" autofocus>
+                                          </div>
+                                        </div>                  
+                                      </div>
+                                      <div role="tabpanel" class="tab-pane" id="senate">
+                                        <div class="panel-title">Legislators by Senate</div>
+                                        <div class="form-group">
+                                          <div class="col-sm-4 col-sm-offset-8">
+                                            <input ng-model="query" class="form-control" type="text" id="stateName" placeholder="Search" autofocus>
+                                          </div>
+                                        </div>                  
+                                      </div>
+                                    </div>
+                                  </form>
+                                </div>
+                                <div class="panel-body">
+                                  <div class="container">
+                                      <div class="table-responsive">
+                                        <table class="table table-hover" style="table-layout:fixed; overflow: auto;">
+                                          <tr>
+                                            <th>Party</th>
+                                            <th>Name</th>
+                                            <th>Chamber</th>
+                                            <th>District</th>
+                                            <th>State</th>
+                                            <th></th>
+                                          </tr>
+                                          <tr class="artist cf" dir-paginate="item in artists | filter: query | filter: query2 | orderBy: 'last_name' | itemsPerPage: 10">
+                                            <td><img class="img-responsive" ng-src="{{item.partyPic}}" ng-style="mobileCheck() ? { 'width':'12%'} : { 'width': '100%' }"></td>
+                                            <td>{{item.last_name + ', ' + item.first_name}}</td>
+                                            <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '100%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                            <td>{{item.district}}</td>
+                                            <td>{{item.state_name}}</td>
+                                            <td><a class="btn btn-primary btn-sm" href="#myCarousel" role="button" data-slide="next" ng-click="open(artists.indexOf(item)); calldetail(item.bioguide_id);">View Details</a></td>
+                                          </tr>
+                                        </table>
+                                      </div>           
+                                    <div class="col-sm-6" style="float: none; margin: 0 auto;">
+                                      <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </section>
+                          </nav>
+                        </div>
+                      </div><!-- content container -->
+                    </div>
+                  </div>
+                  <div class="item">
+                    <div class="panel panel-default"> 
+                      <div class="panel-heading">
+                        <a class="btn btn-default btn-sm" href="#myCarousel" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a><span class="h3">Details</span>
+                        <button type="button" ng-click="artists[ind].favstatus = !artists[ind].favstatus" class="btn btn-default pull-right"><i class="fa fa-star-o" ng-class="{'icon-d': artists[ind].favstatus}" aria-hidden="true"></i></button>
+                      </div>
+                      <div class="panel-body">
+                        <div class="container">
+                          <div class="row">
+                            <div class="col-md-12">
+                              <div class="col-md-6">
+                                <div class="col-md-5">
+                                  <img class="img-responsive" ng-style="mobileCheck() ? { 'width':'90%'} : { 'width': '100%' }" ng-src="https://theunitedstates.io/images/congress/original/{{artists[ind].bioguide_id}}.jpg">
+                                </div>
+                                <div class="col-md-7">
+                                  <div class="table-responsive">
+                                    <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                      <tbody>
+                                        <tr><td>{{artists[ind].title + '. ' + artists[ind].last_name + ', ' + artists[ind].first_name}}</td></tr>
+                                        <tr><td><a href="mailto:{{artists[ind].oc_email}}">{{artists[ind].oc_email}}</a></td></tr>
+                                        <tr><td>Chamber: {{artists[ind].chamber}}</td></tr>
+                                        <tr><td>Contact: <a href="tel:{{artists[ind].phone}}">{{artists[ind].phone}}</a></td></tr>
+                                        <tr><td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'10%'} : { 'width': '35%' }" ng-src="{{artists[ind].partyPic}}"><span style="margin-left:10px">{{artists[ind].partyName}}</span></td></tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                                <div style="margin-top:10px" class="col-md-12">
+                                  <div class="table-responsive">
+                                    <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                      <tbody>
+                                        <tr><th class="col-md-4">Start Term</th><td class="col-md-8">{{convertDate(artists[ind].term_start)}}</td></tr>
+                                        <tr><th class="col-md-4">End Term</th><td class="col-md-8">{{convertDate(artists[ind].term_end)}}</td></tr>
+                                        <tr><th class="col-md-4">Term</th><td class="col-md-8">
+                                            <div class="progress">
+                                              <div class="progress-bar" role="progressbar" aria-valuenow="{{progress(artists[ind].term_start, artists[ind].term_end)}}"
+                                              aria-valuemin="0" aria-valuemax="100" style="width:{{progress(artists[ind].term_start, artists[ind].term_end)}}%">
+                                                {{progress(artists[ind].term_start, artists[ind].term_end)}}%
+                                              </div>
+                                            </div>
+                                        </td></tr>
+                                        <tr><th class="col-md-4">Office</th><td class="col-md-8">{{artists[ind].office}}</td></tr>
+                                        <tr><th class="col-md-4">State</th><td class="col-md-8">{{artists[ind].state_name}}</td></tr>
+                                        <tr><th class="col-md-4">Fax</th><td class="col-md-8"><a href="fax:{{artists[ind].fax}}">{{artists[ind].fax}}</a></td></tr>
+                                        <tr><th class="col-md-4">Birthday</th><td class="col-md-8">{{convertDate(artists[ind].birthday)}}</td></tr>
+                                        <tr><th class="col-md-4">Social Links</th>
+                                          <td class="col-md-8">
+                                          <a href="https://twitter.com/{{artists[ind].twitter_id}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '25%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/t.png"></a>
+                                          <div style="margin-left:15px"><a href="https://www.facebook.com/{{artists[ind].facebook_id}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '25%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/f.png"></a></div>
+                                          <div style="margin-left:15px"><a href="{{artists[ind].website}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '25%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/w.png"></a></div>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>     
+                              </div>
+                              <div class="col-md-6">
+                                <div class="col-md-12">
+                                  <h4>Committees</h4>
+                                  <div class="table-responsive">
+                                    <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                      <tr>
+                                        <th>Chamber</th>
+                                        <th>Committee ID</th>
+                                        <th ng-if="mobileCheck()">Name</th>
+                                      </tr>
+                                      <tr class="commtop cf" ng-repeat="item in commtop5 | limitTo: 5">
+                                        <td>{{caps(item.chamber)}}</td>
+                                        <td>{{item.committee_id}}</td>
+                                        <td ng-if="mobileCheck()">{{item.name}}</td>
+                                      </tr>
+                                    </table>
+                                  </div>
+                                </div>
+                                <div class="col-md-12">
+                                  <h4>Bills</h4>
+                                  <div class="table-responsive">
+                                    <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                      <tr>
+                                        <th>Bill ID</th>
+                                        <th ng-if="mobileCheck()">Title</th>
+                                        <th ng-if="mobileCheck()">Chamber</th>
+                                        <th ng-if="mobileCheck()">Bill Type</th>
+                                        <th ng-if="mobileCheck()">Congress</th>
+                                        <th>Link</th>
+                                      </tr>
+                                      <tr class="billstop cf" ng-repeat="item in billstop5 | limitTo: 5">
+                                        <td>{{item.bill_id}}</td>
+                                        <td ng-if="mobileCheck()">{{item.official_title}}</td>
+                                        <td ng-if="mobileCheck()">{{item.chamber}}</td>
+                                        <td ng-if="mobileCheck()">{{item.bill_type}}</td>
+                                        <td ng-if="mobileCheck()">{{item.congress}}</td>
+                                        <td><a href="{{item.urls.pdf}}">Link</a></td>
+                                      </tr>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="bill">
+          <div class="container" style="padding-right: 0px; padding-left: 0px;">
+            <div class="row">
+              <div class="h3">Bills</div><hr style="width: 100%; color: #3C3C3C; height: 0.5px; background-color:black;">
+              <div id="myCarousel2" class="carousel slide" data-ride="carousel" data-interval="false">
+                <div class="carousel-inner" role="listbox">
+                  <div class="item active">
+                    <div class="well well-sm">
+                      <div class="container">
+                        <div class="row">
+                          <nav class="navbar navbar-default">
+                            <div class="container">                      
+                              <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a style="color: inherit;" role="tab" data-toggle="tab" href="#activebills" ng-click="billquery = null; selectActiveBills()">Active Bills</a></li>
+                                <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#newbills" ng-click="billquery = null; selectNewBills()">New Bills</a></li>
+                              </ul>
+                            </div>
+                            <section class="col-sm-12">
+                              <div class="panel panel-default"> 
+                                <div class="panel-heading">
+                                  <form class="form-horizontal">
+                                    <div class="tab-content">
+                                      <div role="tabpanel" class="tab-pane active" id="activebills">
+                                        <div class="panel-title">Active Bills</div>
+                                        <div class="form-group">
+                                          <div class="col-sm-4 col-sm-offset-8">
+                                            <input ng-model="billquery" class="form-control" type="text" id="activebillName" placeholder="Search" autofocus>
+                                          </div>
+                                        </div>                  
+                                      </div>
+                                      <div role="tabpanel" class="tab-pane" id="newbills">
+                                        <div class="panel-title">New Bills</div>
+                                        <div class="form-group">
+                                          <div class="col-sm-4 col-sm-offset-8">
+                                            <input ng-model="billquery" class="form-control" type="text" id="newbillName" placeholder="Search" autofocus>
+                                          </div>
+                                        </div>                  
+                                      </div>
+                                    </div>
+                                  </form>
+                                </div>
+                                <div class="panel-body">
+                                  <div class="alt-table-responsive">
+                                    <table class="table table-hover" style="table-layout:fixed; overflow: auto;">
+                                      <tr>
+                                        <th>Bill ID</th>
+                                        <th>Bill Type</th>
+                                        <th>Title</th>
+                                        <th>Chamber</th>
+                                        <th>Introduced On</th>
+                                        <th>Sponsor</th>
+                                        <th></th>
+                                      </tr>
+                                      <tr class="artist cf" dir-paginate="item in billdata | filter: billquery | itemsPerPage: 10"> 
+                                        <td>{{item.bill_id}}</td>
+                                        <td>{{item.bill_type}}</td>
+                                        <td>{{item.official_title}}</td>
+                                        <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                        <td>{{item.introduced_on}}</td>
+                                        <td>{{item.sponsor.title + '. ' + item.sponsor.last_name + ', ' + item.sponsor.first_name}}</td>
+                                        <td><a class="btn btn-primary btn-sm" href="#myCarousel2" role="button" data-slide="next" ng-click="billopen(item);">View Details</a></td>
+                                      </tr>
+                                    </table>
+                                  </div>            
+                                  <div class="col-sm-6" style="float: none; margin: 0 auto;">
+                                    <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                                  </div>
+                                </div>
+                              </div>
+                            </section>
+                          </nav>
+                        </div>
+                      </div><!-- content container -->
+                    </div>
+                  </div>
+                  <div class="item">
+                    <div class="panel panel-default"> 
+                      <div class="panel-heading">
+                        <a class="btn btn-default btn-sm" href="#myCarousel2" role="button" data-slide="prev"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a><span class="h3">Details</span>
+                        <button type="button" ng-click="selectedBill.favstatus = !selectedBill.favstatus" class="btn btn-default pull-right"><i class="fa fa-star-o" ng-class="{'icon-d': selectedBill.favstatus}" aria-hidden="true"></i></button>
+                      </div>
+                      <div class="panel-body">
+                        <div class="container">
+                          <div class="row">
+                            <div class="col-md-12">
+                              <div class="col-md-6">
+                                <div class="col-md-12">
+                                  <div class="table-responsive">
+                                    <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                      <tbody>
+                                        <tr><th class="col-md-4">Bill ID</th><td class="col-md-8">{{selectedBill.bill_id}}</td></tr>
+                                        <tr><th class="col-md-4">Title</th><td class="col-md-8">{{selectedBill.official_title}}</td></tr>
+                                        <tr><th class="col-md-4">Bill Type</th><td class="col-md-8">{{selectedBill.bill_type}}</tr>
+                                        <tr><th class="col-md-4">Sponsor</th><td class="col-md-8">{{selectedBill.sponsor.title + '. ' + selectedBill.sponsor.last_name + ', ' + selectedBill.sponsor.first_name}}</td></tr>
+                                        <tr><th class="col-md-4">Chamber</th><td class="col-md-8">{{selectedBill.chamber}}</td></tr>
+                                        <tr><th class="col-md-4">Status</th><td class="col-md-8">{{selectedBill.status}}</td></tr>
+                                        <tr><th class="col-md-4">Introduced On</th><td class="col-md-8">{{selectedBill.introduced_on}}</td></tr>
+                                        <tr><th class="col-md-4">Congress URL</th><td class="col-md-8"><a href="{{selectedBill.urls.congress}}">URL</a></td></tr>
+                                        <tr><th class="col-md-4">Version Status</th><td class="col-md-8">{{selectedBill.last_version.version_name}}</td></tr>
+                                        <tr><th class="col-md-4">Bill URL</th><td class="col-md-8"><a href="{{selectedBill.last_version.urls.pdf}}">Link</a></td></tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>     
+                              </div>
+                              <div class="col-md-6">
+                                <object ng-if="mobileCheck()" ng-attr-data="{{selectedBill.last_version.urls.pdf}}" type="application/pdf" width="100%" height="500px"></object>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="committee">
+          <div class="container" style="padding-right: 0px; padding-left: 0px;">
+            <div class="row">
+              <div class="h3">Committees</div><hr style="width: 100%; color: #3C3C3C; height: 0.5px; background-color:black;">
+              <div class="well well-sm">
+                <div class="container">
+                  <div class="row">
+                    <nav class="navbar navbar-default">
+                      <div class="container">                      
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li class="active"><a style="color: inherit;" role="tab" data-toggle="tab" href="#housecommittee" ng-click="chambertype = 'house';">House</a></li>
+                          <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#senatecommittee" ng-click="chambertype = 'senate';">Senate</a></li>
+                          <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#jointcommittee" ng-click="chambertype = 'joint';">Joint</a></li>
+                        </ul>
+                      </div>
+                      <section class="col-sm-12">
+                        <div class="panel panel-default"> 
+                          <div class="panel-heading">
+                            <form class="form-horizontal">
+                              <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="housecommittee">
+                                  <div class="panel-title">House</div>
+                                  <div class="form-group">
+                                    <div class="col-sm-4 col-sm-offset-8">
+                                      <input ng-model="committeequery" class="form-control" type="text" id="housecommit" placeholder="Search" autofocus>
+                                    </div>
+                                  </div>                  
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="senatecommittee">
+                                  <div class="panel-title">Senate</div>
+                                  <div class="form-group">
+                                    <div class="col-sm-4 col-sm-offset-8">
+                                      <input ng-model="committeequery" class="form-control" type="text" id="senatecommit" placeholder="Search" autofocus>
+                                    </div>
+                                  </div>                  
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="jointcommittee">
+                                  <div class="panel-title">Joint</div>
+                                  <div class="form-group">
+                                    <div class="col-sm-4 col-sm-offset-8">
+                                      <input ng-model="committeequery" class="form-control" type="text" id="jointcommit" placeholder="Search" autofocus>
+                                    </div>
+                                  </div>                  
+                                </div>
+                              </div>
+                            </form>
+                          </div>
+                          <div class="panel-body">
+                            <div class="alt-table-responsive">
+                              <table class="table table-hover" style="table-layout:fixed; overflow: auto;">
+                                <tr>
+                                  <th></th>
+                                  <th>Chamber</th>
+                                  <th>Committee ID</th>
+                                  <th>Name</th>
+                                  <th ng-if="chambertype != 'joint'">Parent Committee</th>
+                                  <th ng-if="chambertype == 'house'">Contact</th>
+                                  <th ng-if="chambertype == 'house'">Office</th>
+                                </tr>
+                                <tr class="artist cf" dir-paginate="item in committeedata | filter: chambertype | filter: committeequery | itemsPerPage: 10"> 
+                                  <td><button type="button" ng-click="item.favstatus = !item.favstatus" class="btn btn-default"><i class="fa fa-star-o" ng-class="{'icon-d': item.favstatus}" aria-hidden="true"></i></button>
+                                  </td>
+                                  <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'25%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                  <td>{{item.committee_id}}</td>
+                                  <td>{{item.name}}</td>
+                                  <td ng-if="chambertype != 'joint'">{{item.parent_committee_id}}</td>
+                                  <td ng-if="chambertype == 'house'">{{item.phone}}</td>
+                                  <td ng-if="chambertype == 'house'">{{item.office}}</td>
+                                </tr>
+                              </table>
+                            </div>            
+                            <div class="col-sm-6" style="float: none; margin: 0 auto;">
+                              <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    </nav>
+                  </div>
+                </div><!-- content container -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="fav">
+
+          <div class="container" style="padding-right: 0px; padding-left: 0px;">
+            <div class="row">
+              <div class="h3">Favorites</div><hr style="width: 100%; color: #3C3C3C; height: 0.5px; background-color:black;">
+              <div class="well well-sm">
+                <div class="container">
+                  <div class="row">
+                    <div id="favCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
+                      <div class="carousel-inner" role="listbox">
+                        <div class="item active">
+                          <nav class="navbar navbar-default">
+                            <div class="container">                      
+                              <ul class="nav nav-tabs" role="tablist">
+                                <li class="active"><a style="color: inherit;" role="tab" data-toggle="tab" href="#favlegislators" ng-click="">Legislators</a></li>
+                                <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#favbills" ng-click="">Bills</a></li>
+                                <li><a role="tab" style="color: inherit;" data-toggle="tab" href="#favcommittee" ng-click="">Committees</a></li>
+                              </ul>
+                            </div>
+                            <section class="col-sm-12">
+                              <div class="panel panel-default">
+                                <div class="tab-content">
+                                  <div role="tabpanel" class="tab-pane active" id="favlegislators">
+                                    <div class="panel-heading">
+                                      <div class="panel-title">Favorite Legislators</div>
+                                    </div>
+                                    <div class="panel-body">
+                                      <div class="table-responsive">
+                                        <table class="table table-hover" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                          <tr>
+                                            <th></th>
+                                            <th>Image</th>
+                                            <th>Party</th>
+                                            <th>Name</th>
+                                            <th>Chamber</th>
+                                            <th>State</th>
+                                            <th>Email</th>
+                                            <th></th>
+                                          </tr>
+                                          <tr class="artist cf" ng-repeat="item in artists" ng-show="([item] | filter:favSelected).length > 0"> 
+                                            <td><button type="button" ng-click="item.favstatus = false;" class="btn btn-default"><i class="fa fa-trash-o" aria-hidden="true"></i></button></td>
+                                            <td><img class="img-responsive" ng-style="mobileCheck() ? { 'width':'30%'} : { 'width': '90%' }" ng-src="https://theunitedstates.io/images/congress/original/{{item.bioguide_id}}.jpg"></td>
+                                            <td><img class="img-responsive" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '75%' }" ng-src="{{item.partyPic}}"></td>
+                                            <td>{{item.last_name + ', ' + item.first_name}}</td>
+                                            <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                            <td>{{item.state_name}}</td>
+                                            <td><a href="mailto:{{item.oc_email}}">{{artists[ind].oc_email}}</a></td>
+<!--                                             <td><button class="btn btn-primary btn-sm" data-target="#favCarousel" data-slide-to="1" ng-click="open(artists.indexOf(item)); calldetail(item.bioguide_id);">View Details</button> -->
+                                            <td><a class="btn btn-primary btn-sm" href="#favCarousel" role="button" data-slide="next" ng-click="open(artists.indexOf(item)); calldetail(item.bioguide_id);">View Details</a></td>
+                                          </tr>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div role="tabpanel" class="tab-pane" id="favbills">
+                                    <div class="panel-heading">
+                                      <div class="panel-title">Favorite Bills</div>
+                                    </div>
+                                    <div class="panel-body">
+                                      <div class="table-responsive">
+                                        <table class="table table-hover" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                          <tr>
+                                            <th></th>
+                                            <th>Bill ID</th>
+                                            <th>Bill Type</th>
+                                            <th>Title</th>
+                                            <th>Chamber</th>
+                                            <th>Introduced On</th>
+                                            <th>Sponsor</th>
+                                            <th></th>
+                                          </tr>
+                                          <tr class="artist cf" ng-repeat="item in activebills.concat(newbills)" ng-show="([item] | filter:favSelected).length > 0"> 
+                                            <td><button type="button" ng-click="item.favstatus = false;" class="btn btn-default"><i class="fa fa-trash-o" aria-hidden="true"></i></button></td>
+                                            <td>{{item.bill_id}}</td>
+                                            <td>{{item.bill_type}}</td>
+                                            <td>{{item.official_title}}</td>
+                                            <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                            <td>{{item.introduced_on}}</td>
+                                            <td>{{item.sponsor.title + '. ' + item.sponsor.last_name + ', ' + item.sponsor.first_name}}</td>
+                                            <td><a class="btn btn-primary btn-sm" href="#favCarousel" role="button" data-slide-to="2" ng-click="billopen(item);">View Details</a></td>
+                                          </tr>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div role="tabpanel" class="tab-pane" id="favcommittee">
+                                    <div class="panel-heading">
+                                      <div class="panel-title">Favorite Committees</div>
+                                    </div>
+                                    <div class="panel-body">
+                                      <div class="table-responsive">
+                                        <table class="table table-hover" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                          <tr>
+                                            <th></th>
+                                            <th>Chamber</th>
+                                            <th>Committee ID</th>
+                                            <th>Name</th>
+                                            <th>Parent Committee</th>
+                                            <th>Sub Committee</th>
+                                          </tr>
+                                          <tr class="artist cf" ng-repeat="item in committeedata" ng-show="([item] | filter:favSelected).length > 0"> 
+                                            <td><button type="button" ng-click="item.favstatus = false;" class="btn btn-default"><i class="fa fa-trash-o" aria-hidden="true"></i></button></td>
+                                            <td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'25%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.pic}}"><span style="margin-left:10px">{{item.chamber}}</span></td>
+                                            <td>{{item.committee_id}}</td>
+                                            <td>{{item.name}}</td>
+                                            <td>{{item.parent_committee_id}}</td>
+                                            <td>{{item.subcommittee}}</td>
+                                          </tr>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </section>
+                          </nav>
+                        </div>
+                        <div class="item">
+                          <div class="panel panel-default"> 
+                            <div class="panel-heading">
+                              <a class="btn btn-default btn-sm" href="#favCarousel" role="button" data-slide-to="0"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a><span class="h3">Details</span>                           
+                              <button type="button" ng-click="artists[ind].favstatus = !artists[ind].favstatus" class="btn btn-default pull-right"><i class="fa fa-star-o" ng-class="{'icon-d': artists[ind].favstatus}" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="panel-body">
+                              <div class="container">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                    <div class="col-md-6">
+                                      <div class="col-md-5">
+                                        <img class="img-responsive" ng-style="mobileCheck() ? { 'width':'90%'} : { 'width': '100%' }" ng-src="https://theunitedstates.io/images/congress/original/{{artists[ind].bioguide_id}}.jpg">
+                                      </div>
+                                      <div class="col-md-7">
+                                        <div class="table-responsive">
+                                          <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                            <tbody>
+                                              <tr><td>{{artists[ind].title + '. ' + artists[ind].last_name + ', ' + artists[ind].first_name}}</td></tr>
+                                              <tr><td><a href="mailto:{{artists[ind].oc_email}}">{{artists[ind].oc_email}}</a></td></tr>
+                                              <tr><td>Chamber: {{artists[ind].chamber}}</td></tr>
+                                              <tr><td>Contact: <a href="tel:{{artists[ind].phone}}">{{artists[ind].phone}}</a></td></tr>
+                                              <tr><td><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'10%'} : { 'width': '35%' }" ng-src="{{artists[ind].partyPic}}"><span style="margin-left:10px">{{artists[ind].partyName}}</span></td></tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                      <div style="margin-top:10px" class="col-md-12">
+                                        <div class="table-responsive">
+                                          <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                            <tbody>
+                                              <tr><th class="col-md-4">Start Term</th><td class="col-md-8">{{convertDate(artists[ind].term_start)}}</td></tr>
+                                              <tr><th class="col-md-4">End Term</th><td class="col-md-8">{{convertDate(artists[ind].term_end)}}</td></tr>
+                                              <tr><th class="col-md-4">Term</th><td class="col-md-8">
+                                                  <div class="progress">
+                                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{progress(artists[ind].term_start, artists[ind].term_end)}}"
+                                                    aria-valuemin="0" aria-valuemax="100" style="width:{{progress(artists[ind].term_start, artists[ind].term_end)}}%">
+                                                      {{progress(artists[ind].term_start, artists[ind].term_end)}}%
+                                                    </div>
+                                                  </div>
+                                              </td></tr>
+                                              <tr><th class="col-md-4">Office</th><td class="col-md-8">{{artists[ind].office}}</td></tr>
+                                              <tr><th class="col-md-4">State</th><td class="col-md-8">{{artists[ind].state_name}}</td></tr>
+                                              <tr><th class="col-md-4">Fax</th><td class="col-md-8"><a href="fax:{{artists[ind].fax}}">{{artists[ind].fax}}</a></td></tr>
+                                              <tr><th class="col-md-4">Birthday</th><td class="col-md-8">{{convertDate(artists[ind].birthday)}}</td></tr>
+                                              <tr><th class="col-md-4">Social Links</th>
+                                                <td class="col-md-8">
+                                                <a href="https://twitter.com/{{artists[ind].twitter_id}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/t.png"></a>
+                                                <div style="margin-left:15px"><a href="https://www.facebook.com/{{artists[ind].facebook_id}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/f.png"></a></div>
+                                                <div style="margin-left:15px"><a href="{{artists[ind].website}}"><img class="img-responsive pull-left" ng-style="mobileCheck() ? { 'width':'15%'} : { 'width': '50%' }" ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/w.png"></a></div>
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>     
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="col-md-12">
+                                        <h4>Committees</h4>
+                                        <div class="table-responsive">
+                                          <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                            <tr>
+                                              <th>Chamber</th>
+                                              <th>Committee ID</th>
+                                              <th>Name</th>
+                                            </tr>
+                                            <tr class="commtop cf" ng-repeat="item in commtop5 | limitTo: 5">
+                                              <td>{{caps(item.chamber)}}</td>
+                                              <td>{{item.committee_id}}</td>
+                                              <td>{{item.name}}</td>
+                                            </tr>
+                                          </table>
+                                        </div>
+                                      </div>
+                                      <div class="col-md-12">
+                                        <h4>Bills</h4>
+                                        <div class="table-responsive">
+                                          <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                            <tr>
+                                              <th>Bill ID</th>
+                                              <th>Title</th>
+                                              <th>Chamber</th>
+                                              <th>Bill Type</th>
+                                              <th>Congress</th>
+                                              <th>Link</th>
+                                            </tr>
+                                            <tr class="billstop cf" ng-repeat="item in billstop5 | limitTo: 5">
+                                              <td>{{item.bill_id}}</td>
+                                              <td>{{item.official_title}}</td>
+                                              <td>{{item.chamber}}</td>
+                                              <td>{{item.bill_type}}</td>
+                                              <td>{{item.congress}}</td>
+                                              <td><a href="{{item.urls.pdf}}">Link</a></td>
+                                            </tr>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="item">
+                          <div class="panel panel-default"> 
+                            <div class="panel-heading">
+                              <a class="btn btn-default btn-sm" href="#favCarousel" role="button" data-slide-to="0"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a><span class="h3">Details</span>
+                              <button type="button" ng-click="selectedBill.favstatus = !selectedBill.favstatus" class="btn btn-default pull-right"><i class="fa fa-star-o" ng-class="{'icon-d': selectedBill.favstatus}" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="panel-body">
+                              <div class="container">
+                                <div class="row">
+                                  <div class="col-md-12">
+                                    <div class="col-md-6">
+                                      <div class="col-md-12">
+                                        <div class="table-responsive">
+                                          <table class="table" style="table-layout:fixed; word-wrap: break-word; overflow: auto;">
+                                            <tbody>
+                                              <tr><th class="col-md-4">Bill ID</th><td class="col-md-8">{{selectedBill.bill_id}}</td></tr>
+                                              <tr><th class="col-md-4">Title</th><td class="col-md-8">{{selectedBill.official_title}}</td></tr>
+                                              <tr><th class="col-md-4">Bill Type</th><td class="col-md-8">{{selectedBill.bill_type}}</tr>
+                                              <tr><th class="col-md-4">Sponsor</th><td class="col-md-8">{{selectedBill.sponsor.title + '. ' + selectedBill.sponsor.last_name + ', ' + selectedBill.sponsor.first_name}}</td></tr>
+                                              <tr><th class="col-md-4">Chamber</th><td class="col-md-8">{{selectedBill.chamber}}</td></tr>
+                                              <tr><th class="col-md-4">Status</th><td class="col-md-8">{{selectedBill.status}}</td></tr>
+                                              <tr><th class="col-md-4">Introduced On</th><td class="col-md-8">{{selectedBill.introduced_on}}</td></tr>
+                                              <tr><th class="col-md-4">Congress URL</th><td class="col-md-8"><a href="{{selectedBill.urls.congress}}">URL</a></td></tr>
+                                              <tr><th class="col-md-4">Version Status</th><td class="col-md-8">{{selectedBill.last_version.version_name}}</td></tr>
+                                              <tr><th class="col-md-4">Bill URL</th><td class="col-md-8"><a href="{{selectedBill.last_version.urls.pdf}}">Link</a></td></tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>     
+                                    </div>
+                                    <div class="col-md-6">
+                                      <object ng-attr-data="{{selectedBill.last_version.urls.pdf}}" type="application/pdf" width="100%" height="500px"></object>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div><!-- content container -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+    </script>
+</body>
+</html>
